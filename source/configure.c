@@ -31,7 +31,6 @@
 
 #include "stdio.h"
 #include "stdlib.h"
-#include "windows.h"
 
 #include "cryptoauthlib.h"
 
@@ -113,7 +112,7 @@ int atca_configure(uint8_t i2c_addr)
         printf("Unable to read revision: %x\r\n", status);
         goto exit;
     }
-    
+
     /* Program the configuration zone */
     if (!lock)
     {
@@ -202,7 +201,11 @@ exit:
     return status;
 }
 
+#if defined(_WIN32) || defined(__linux__) || defined(__unix__)
+
 int main(int argc, char *argv[])
 {
     return atca_configure(0xC0);
 }
+
+#endif

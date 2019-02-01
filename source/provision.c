@@ -31,7 +31,6 @@
 
 #include "stdio.h"
 #include "stdlib.h"
-#include "windows.h"
 
 #include "cryptoauthlib.h"
 #include "atcacert/atcacert_client.h"
@@ -41,6 +40,13 @@
 
 uint8_t device_der_qa[sizeof(provisioning_device_cert) + 8];
 uint8_t signer_der_qa[sizeof(provisioning_signer_cert) + 8];
+
+uint8_t atca_io_protection_key[32] = {
+    0x37, 0x80, 0xe6, 0x3d, 0x49, 0x68, 0xad, 0xe5,
+    0xd8, 0x22, 0xc0, 0x13, 0xfc, 0xc3, 0x23, 0x84,
+    0x5d, 0x1b, 0x56, 0x9f, 0xe7, 0x05, 0xb6, 0x00,
+    0x06, 0xfe, 0xec, 0x14, 0x5a, 0x0d, 0xb1, 0xe3
+};
 
 /* Writes the certificates into a device*/
 int atca_provision(void)
@@ -60,11 +66,17 @@ int atca_provision(void)
 		goto exit;
 	}
 
+    if (ATCA_SUCCESS != (status = atcab_write_zone(ATCA_ZONE_DATA, 4, 0, 0, atca_io_protection_key, ATCA_BLOCK_SIZE)))
+    {
+        printf("Failed to write IO Prot Key: %x\n", status);
+        goto exit;
+    }
+
     if (g_cert_def_1_signer.ca_cert_def)
     {
         /* Write the ca public key (signer authority) - normally static data */
         printf("Writing Root Public Key\r\n");
-        if (ATCA_SUCCESS != (status = atcab_write_pubkey(g_cert_def_1_signer.ca_cert_def->public_key_dev_loc.slot, 
+        if (ATCA_SUCCESS != (status = atcab_write_pubkey(g_cert_def_1_signer.ca_cert_def->public_key_dev_loc.slot,
             provisioning_root_public_key)))
         {
             printf("Failed to write root ca public key\r\n");
@@ -162,7 +174,11 @@ exit:
 	return ret;
 }
 
+#if defined(_WIN32) || defined(__linux__) || defined(__unix__)
+
 int main(int argc, char *argv[])
 {
     return atca_provision();
 }
+
+#endif
