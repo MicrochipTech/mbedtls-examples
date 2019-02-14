@@ -35,7 +35,7 @@ ${device_certificate}};
 static const uint8_t provisioning_signer_cert[] = {
 ${signer_certificate}};
 
-static const char provisioning_root_public_key[] = {
+static const uint8_t provisioning_root_public_key[] = {
 ${root_public_key}};
 """)
 

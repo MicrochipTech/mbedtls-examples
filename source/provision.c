@@ -145,7 +145,7 @@ int atca_provision(void)
 	printf("Comparing Device Certificate\r\n");
 	if (memcmp(provisioning_device_cert, device_der_qa, device_size))
 	{
-		printf("Signer certificate missmatch\r\n");
+		printf("Device certificate missmatch\r\n");
 
 		diff = false;
 		for (i = 0; i < device_size; i++)
